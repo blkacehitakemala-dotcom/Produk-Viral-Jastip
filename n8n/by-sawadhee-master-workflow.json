@@ -1,0 +1,258 @@
+{
+  "name": "By Sawadhee — Master Chatbot & Jastip Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Panduan Setup Master Workflow By Sawadhee\n\n1. Aktifkan workflow ini (toggle **Active** di kanan atas).\n2. Klik node **Webhook Chatbot**, lalu salin **Production URL**.\n3. Tempel URL tersebut ke **Settings → Secrets** aplikasi sebagai `N8N_WEBHOOK_URL`.\n4. Payload masuk dari `/api/chatbot`: `{ message, chatInput, sessionId, timestamp, source }`.\n5. Format balasan JSON yang dikembalikan: `{ reply, intent, batch, matchedProducts, whatsappUrl, sessionId, receivedAt }`.\n\n*Opsional: Anda bisa mengganti atau menambahkan node AI Agent / Google Gemini sebelum node **Kirim Respons JSON** jika ingin jawaban AI generatif.*",
+        "height": 260,
+        "width": 520,
+        "color": 4
+      },
+      "id": "sticky-guide-01",
+      "name": "Panduan Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "by-sawadhee-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-chatbot-01",
+      "name": "Webhook Chatbot",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        380
+      ],
+      "webhookId": "by-sawadhee-chatbot"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json || {};\nconst body = raw.body && typeof raw.body === 'object' ? raw.body : raw;\n\nconst userMessage = String(body.message || body.chatInput || '').trim();\nconst q = userMessage.toLowerCase();\nconst sessionId = String(body.sessionId || 'guest-session').trim();\nconst timestamp = String(body.timestamp || new Date().toISOString());\n\nconst ADMIN_WA = '6285836137886';\nconst BATCH = {\n  batchCode: 'Batch #14',\n  statusLabel: 'Open PO Aktif',\n  openPoDates: '25 – 30 Nov 2026',\n  shoppingRestockDates: '1 – 3 Des 2026',\n  shippingEstimate: 'Mulai 5 Des 2026',\n  note: 'Item bertanda Ready Stock langsung dikirim H+1 setelah konfirmasi.'\n};\n\nconst CATALOG = [\n  {\n    id: 'glow-niacinamide-serum',\n    name: 'Aura Skn Brightening Radiance Serum 30ml',\n    category: 'Skincare & Kecantikan',\n    availability: 'Ready Stock',\n    price: 165000,\n    variants: ['30ml (Full Size)', '15ml (Travel Size)'],\n    keywords: ['serum', 'aura skn', 'niacinamide', 'vitamin c', 'skincare', 'cerah']\n  },\n  {\n    id: 'lumiere-velvet-cushion',\n    name: 'Lumiere Matte Velvet Cushion SPF 35',\n    category: 'Skincare & Kecantikan',\n    availability: 'Open PO',\n    price: 235000,\n    variants: ['01 Ivory Fair', '02 Warm Beige', '03 Honey Sand'],\n    keywords: ['cushion', 'lumiere', 'velvet', 'makeup', 'spf', 'skincare']\n  },\n  {\n    id: 'lumin-gloss-lip-tint',\n    name: 'Lumin Glassy Velvet Lip Tint',\n    category: 'Skincare & Kecantikan',\n    availability: 'Ready Stock',\n    price: 118000,\n    variants: ['01 Coral Peach', '02 Rosewood Mauve'],\n    keywords: ['lip', 'tint', 'liptint', 'lumin', 'bibir', 'makeup']\n  },\n  {\n    id: 'momo-ceremonial-matcha',\n    name: 'Momo Ceremonial Grade Matcha Tin 40g',\n    category: 'Makanan & Minuman Viral',\n    availability: 'Open PO',\n    price: 195000,\n    variants: ['Kaleng 40g', 'Refill Pouch 80g'],\n    keywords: ['matcha', 'momo', 'teh hijau', 'minuman', 'latte']\n  },\n  {\n    id: 'aura-freeze-dried-mango',\n    name: 'Aura Freeze-Dried Golden Mango 100g',\n    category: 'Makanan & Minuman Viral',\n    availability: 'Ready Stock',\n    price: 78000,\n    variants: ['Original 100g', 'Paket Hemat 3 Pouch'],\n    keywords: ['mango', 'mangga', 'snack', 'camilan', 'freeze']\n  },\n  {\n    id: 'cha-thai-artisanal-box',\n    name: 'Cha Thai Artisanal Milk Tea (Isi 10 Sachet)',\n    category: 'Makanan & Minuman Viral',\n    availability: 'Ready Stock',\n    price: 89000,\n    variants: ['Original Sweet (10 Sachet)', 'Less Sugar (10 Sachet)'],\n    keywords: ['thai tea', 'cha thai', 'milk tea', 'teh', 'sachet']\n  },\n  {\n    id: 'aura-herbal-inhaler-set',\n    name: 'Aura Eucalyptus Mint Inhaler & Roll-On Set',\n    category: 'Kebutuhan Rumah & Gaya Hidup',\n    availability: 'Open PO',\n    price: 135000,\n    variants: ['Set Inhaler + Roll-On', 'Inhaler Only'],\n    keywords: ['inhaler', 'roll-on', 'aromaterapi', 'mint', 'eucalyptus', 'minyak']\n  },\n  {\n    id: 'quilted-travel-organizer',\n    name: 'Sawadhee Quilted Travel & Cosmetic Pouch',\n    category: 'Kebutuhan Rumah & Gaya Hidup',\n    availability: 'Ready Stock',\n    price: 149000,\n    variants: ['Sage Teal', 'Warm Oat'],\n    keywords: ['pouch', 'tas', 'organizer', 'travel', 'cosmetic']\n  }\n];\n\nconst SHIPPING_ZONES = [\n  { id: 'jawa', name: 'Pulau Jawa', ratePerKg: 14000, estimateDays: '1 – 3 hari kerja', keywords: ['jawa', 'jakarta', 'jabodetabek', 'bandung', 'surabaya', 'semarang', 'yogya', 'malang'] },\n  { id: 'sumatera', name: 'Sumatera', ratePerKg: 24000, estimateDays: '2 – 5 hari kerja', keywords: ['sumatera', 'medan', 'palembang', 'lampung', 'padang'] },\n  { id: 'bali-nusra', name: 'Bali & Nusa Tenggara', ratePerKg: 26000, estimateDays: '3 – 5 hari kerja', keywords: ['bali', 'denpasar', 'lombok', 'mataram', 'kupang'] },\n  { id: 'kalimantan', name: 'Kalimantan', ratePerKg: 34000, estimateDays: '3 – 6 hari kerja', keywords: ['kalimantan', 'balikpapan', 'banjarmasin', 'pontianak'] },\n  { id: 'sulawesi', name: 'Sulawesi', ratePerKg: 38000, estimateDays: '4 – 7 hari kerja', keywords: ['sulawesi', 'makassar', 'manado', 'palu', 'kendari'] },\n  { id: 'maluku-papua', name: 'Maluku & Papua', ratePerKg: 58000, estimateDays: '5 – 9 hari kerja', keywords: ['maluku', 'papua', 'ambon', 'jayapura', 'sorong'] }\n];\n\nconst matchedProducts = CATALOG.filter((item) =>\n  item.keywords.some((kw) => q.includes(kw)) ||\n  (q.includes('ready') && item.availability === 'Ready Stock') ||\n  (q.includes('open po') && item.availability === 'Open PO')\n);\n\nconst matchedZone = SHIPPING_ZONES.find((z) =>\n  z.keywords.some((kw) => q.includes(kw))\n) || null;\n\nlet intent = 'umum';\nif (q.includes('batch') || q.includes('jadwal') || q.includes('kapan') || q.includes('kirim')) {\n  intent = 'jadwal_batch';\n} else if (\n  matchedProducts.length > 0 ||\n  q.includes('produk') ||\n  q.includes('stok') ||\n  q.includes('harga') ||\n  q.includes('katalog') ||\n  q.includes('ready')\n) {\n  intent = 'cek_produk';\n} else if (\n  matchedZone !== null ||\n  q.includes('ongkir') ||\n  q.includes('cod') ||\n  q.includes('bayar') ||\n  q.includes('transfer') ||\n  q.includes('dp') ||\n  q.includes('qris')\n) {\n  intent = 'ongkir_pembayaran';\n}\n\nreturn [{\n  json: {\n    userMessage,\n    sessionId,\n    timestamp,\n    intent,\n    adminWa: ADMIN_WA,\n    batch: BATCH,\n    matchedProducts,\n    matchedZone,\n    shippingZones: SHIPPING_ZONES,\n    catalogCount: CATALOG.length\n  }\n}];"
+      },
+      "id": "code-extract-01",
+      "name": "Ekstrak Pesan & Katalog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.intent }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "jadwal_batch"
+            },
+            {
+              "value2": "cek_produk"
+            },
+            {
+              "value2": "ongkir_pembayaran"
+            }
+          ]
+        },
+        "fallbackOutput": 3
+      },
+      "id": "switch-intent-01",
+      "name": "Routing Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        680,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst b = d.batch;\nconst waText = encodeURIComponent(`Halo Admin By Sawadhee, saya ingin tanya jadwal ${b.batchCode}: ${d.userMessage}`);\n\nreturn [{\n  json: {\n    reply: `Jadwal ${b.batchCode} (${b.statusLabel}):\\n• Buka Pre-Order: ${b.openPoDates}\\n• Belanja & Restock: ${b.shoppingRestockDates}\\n• Estimasi Pengiriman: ${b.shippingEstimate}\\n\\n${b.note}`,\n    intent: d.intent,\n    batch: b,\n    sessionId: d.sessionId,\n    whatsappUrl: `https://wa.me/${d.adminWa}?text=${waText}`,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-batch-01",
+      "name": "Balasan Jadwal Batch PO",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst formatRp = (n) => 'Rp ' + Math.round(n).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\nconst items = d.matchedProducts || [];\n\nlet reply = '';\nif (items.length > 0) {\n  const lines = items.slice(0, 4).map((p, idx) =>\n    `${idx + 1}. ${p.name} — ${formatRp(p.price)} (${p.availability})`\n  );\n  reply = `Berikut produk By Sawadhee yang cocok dengan pertanyaan Anda:\\n${lines.join('\\n')}\\n\\nKlik \"+ Keranjang\" di katalog untuk langsung menghitung subtotal & kirim order ke WhatsApp.`;\n} else {\n  reply = `Saat ini tersedia ${d.catalogCount} produk kurasi By Sawadhee (Skincare, Makanan & Minuman Viral, serta Kebutuhan Rumah). Item bertanda Ready Stock dikirim H+1, sedangkan Open PO mengikuti jadwal ${d.batch.batchCode}.`;\n}\n\nconst waText = encodeURIComponent(`Halo Admin By Sawadhee, saya ingin menanyakan stok produk: ${d.userMessage}`);\n\nreturn [{\n  json: {\n    reply,\n    intent: d.intent,\n    batch: d.batch.batchCode,\n    matchedProducts: items.map((p) => ({\n      id: p.id,\n      name: p.name,\n      price: p.price,\n      availability: p.availability,\n      variants: p.variants\n    })),\n    sessionId: d.sessionId,\n    whatsappUrl: `https://wa.me/${d.adminWa}?text=${waText}`,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-product-01",
+      "name": "Balasan Katalog & Stok",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst formatRp = (n) => 'Rp ' + Math.round(n).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');\n\nlet ongkirText = '';\nif (d.matchedZone) {\n  ongkirText = `Estimasi ongkir ke ${d.matchedZone.name}: ${formatRp(d.matchedZone.ratePerKg)}/kg (${d.matchedZone.estimateDays}).`;\n} else {\n  ongkirText = 'Estimasi ongkir reguler mulai Rp 14.000/kg (Pulau Jawa), Rp 24.000/kg (Sumatera), Rp 26.000/kg (Bali & Nusra), hingga Rp 34.000–58.000/kg (Kalimantan, Sulawesi, Maluku & Papua).';\n}\n\nconst reply = `${ongkirText}\\n\\nMetode pembayaran: Transfer Bank, QRIS/E-Wallet (GoPay/OVO), dan COD untuk produk Ready Stock. Khusus item Open PO di atas Rp 300.000 cukup DP 50%.`;\nconst waText = encodeURIComponent(`Halo Admin By Sawadhee, saya ingin cek ongkir & metode pembayaran: ${d.userMessage}`);\n\nreturn [{\n  json: {\n    reply,\n    intent: d.intent,\n    matchedZone: d.matchedZone,\n    paymentMethods: ['Transfer Bank', 'E-Wallet (QRIS / GoPay / OVO)', 'COD (Bayar di Tempat)'],\n    sessionId: d.sessionId,\n    whatsappUrl: `https://wa.me/${d.adminWa}?text=${waText}`,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-shipping-01",
+      "name": "Balasan Ongkir & Bayar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst waText = encodeURIComponent(`Halo Admin By Sawadhee, saya ingin bertanya / titip barang: ${d.userMessage}`);\n\nreturn [{\n  json: {\n    reply: `Terima kasih telah menghubungi By Sawadhee! Untuk titip barang di luar katalog atau konsultasi ${d.batch.batchCode}, silakan kirim detail/foto produk langsung ke WhatsApp Admin (${d.adminWa}) agar tim kami segera cek harga & slot belanjanya.`,\n    intent: d.intent,\n    batch: d.batch.batchCode,\n    echoMessage: d.userMessage,\n    sessionId: d.sessionId,\n    whatsappUrl: `https://wa.me/${d.adminWa}?text=${waText}`,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-general-01",
+      "name": "Balasan Umum & Jastip",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-webhook-01",
+      "name": "Kirim Respons JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1260,
+        380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Chatbot": {
+      "main": [
+        [
+          {
+            "node": "Ekstrak Pesan & Katalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ekstrak Pesan & Katalog": {
+      "main": [
+        [
+          {
+            "node": "Routing Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Routing Intent": {
+      "main": [
+        [
+          {
+            "node": "Balasan Jadwal Batch PO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Balasan Katalog & Stok",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Balasan Ongkir & Bayar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Balasan Umum & Jastip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balasan Jadwal Batch PO": {
+      "main": [
+        [
+          {
+            "node": "Kirim Respons JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balasan Katalog & Stok": {
+      "main": [
+        [
+          {
+            "node": "Kirim Respons JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balasan Ongkir & Bayar": {
+      "main": [
+        [
+          {
+            "node": "Kirim Respons JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balasan Umum & Jastip": {
+      "main": [
+        [
+          {
+            "node": "Kirim Respons JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1a9d6f4b-8e2c-4f10-9c31-7e5b4c8d9a01",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

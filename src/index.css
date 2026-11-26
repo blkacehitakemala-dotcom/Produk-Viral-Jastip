@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  body {
+    background-color: #FAF9F6;
+    color: #0F172A;
+    overflow-x: hidden;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.bg-sawadhee-mesh {
+  background-color: #FAF9F6;
+  background-image:
+    radial-gradient(at 8% 12%, rgba(20, 184, 166, 0.13) 0px, transparent 48%),
+    radial-gradient(at 92% 8%, rgba(251, 191, 36, 0.14) 0px, transparent 45%),
+    radial-gradient(at 82% 52%, rgba(45, 212, 191, 0.09) 0px, transparent 50%),
+    radial-gradient(at 14% 78%, rgba(253, 186, 116, 0.12) 0px, transparent 48%),
+    radial-gradient(at 55% 94%, rgba(153, 246, 228, 0.14) 0px, transparent 52%);
+  background-attachment: fixed;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

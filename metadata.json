@@ -1,0 +1,8 @@
+{
+  "name": "Remix By Sawadhee — Katalog Produk Viral \u0026 Jastip Terpercaya",
+  "description": "Katalog produk viral terkurasi dan jasa titip (jastip) terpercaya lintas generasi dengan estimasi batch, kalkulator ongkir, dan checkout WhatsApp otomatis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
